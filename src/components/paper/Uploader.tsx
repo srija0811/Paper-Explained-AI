@@ -22,8 +22,20 @@ export function Uploader({ file, onFile, onGenerate, busy }: Props) {
     [onFile],
   );
 
+  const openPicker = () => inputRef.current?.click();
+
   return (
     <div className="glass-card p-6 sm:p-8">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        className="sr-only"
+        onChange={(e) => {
+          onFile(e.target.files?.[0] ?? null);
+          e.target.value = "";
+        }}
+      />
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -31,10 +43,15 @@ export function Uploader({ file, onFile, onGenerate, busy }: Props) {
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
+        onClick={openPicker}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openPicker();
+          }
+        }}
         className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-12 text-center transition-all ${
           dragging
             ? "border-primary bg-primary/10 scale-[1.01]"
@@ -48,17 +65,16 @@ export function Uploader({ file, onFile, onGenerate, busy }: Props) {
         <p className="mt-1 text-sm text-muted-foreground">
           PDF up to 40 MB — or click to browse your files
         </p>
-        <span className="mt-5 inline-flex items-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            openPicker();
+          }}
+          className="mt-5 inline-flex items-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-muted"
+        >
           <FileText className="size-4" /> Upload PDF
-        </span>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="application/pdf,.pdf"
-          className="hidden"
-          onChange={(e) => onFile(e.target.files?.[0] ?? null)}
-        />
-      </div>
+        </button>
 
       {file && (
         <div className="mt-5 flex items-center justify-between gap-4 rounded-xl border border-border bg-surface px-4 py-3">
