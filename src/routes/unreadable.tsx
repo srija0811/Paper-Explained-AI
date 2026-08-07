@@ -3,7 +3,7 @@ import { AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/unreadable")({
   validateSearch: (search: Record<string, unknown>) => ({
-    name: typeof search.name === "string" ? search.name : undefined,
+    name: typeof search["name"] === "string" ? (search["name"] as string) : undefined,
   }),
   head: () => ({
     meta: [
