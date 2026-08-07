@@ -99,10 +99,11 @@ function Index() {
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-medium text-accent">
             <Sparkles className="size-3.5" /> PDF → narrated explainer video
           </span>
-          <h1 className="mt-6 font-display text-4xl leading-[1.05] font-bold sm:text-5xl lg:text-6xl">
+          <h1 className="mt-5 font-display text-2xl leading-tight font-bold sm:text-3xl lg:text-4xl">
             Understand any research paper in <span className="text-gradient">ninety seconds</span>
           </h1>
-          <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+          <p className="mt-4 max-w-xl text-base text-muted-foreground">
+
             Drop in a PDF. Paper Explained AI summarizes the contribution, pulls out the figures,
             writes the narration and renders a video you can actually share.
           </p>

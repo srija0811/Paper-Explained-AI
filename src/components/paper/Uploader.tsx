@@ -75,6 +75,8 @@ export function Uploader({ file, onFile, onGenerate, busy }: Props) {
         >
           <FileText className="size-4" /> Upload PDF
         </button>
+      </div>
+
 
       {file && (
         <div className="mt-5 flex items-center justify-between gap-4 rounded-xl border border-border bg-surface px-4 py-3">
