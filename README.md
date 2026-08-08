@@ -34,6 +34,9 @@ The application should have:
 
 - React + TypeScript
 
+## Demo / Resources
+- [Project Demo Video / Link](https://drive.google.com/file/d/146xByQUZG7cplBPDTOO_zmNjd9BtANFQ/view?usp=sharing)
+
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
