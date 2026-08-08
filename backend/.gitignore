@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+uploads/*
+!uploads/.gitkeep
+uploads/images/*
+!uploads/images/.gitkeep

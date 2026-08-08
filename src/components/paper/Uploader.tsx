@@ -2,13 +2,13 @@ import { useCallback, useRef, useState } from "react";
 import { FileText, Sparkles, UploadCloud, X } from "lucide-react";
 
 type Props = {
-  file: File | null;
-  onFile: (file: File | null) => void;
-  onGenerate: () => void;
+  files: File[];
+  onFiles: (files: File[]) => void;
+  onGenerate: (mode?: "single" | "merge") => void;
   busy: boolean;
 };
 
-export function Uploader({ file, onFile, onGenerate, busy }: Props) {
+export function Uploader({ files, onFiles, onGenerate, busy }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -16,10 +16,12 @@ export function Uploader({ file, onFile, onGenerate, busy }: Props) {
     (e: React.DragEvent) => {
       e.preventDefault();
       setDragging(false);
-      const dropped = e.dataTransfer.files?.[0];
-      if (dropped) onFile(dropped);
+      const dropped = Array.from(e.dataTransfer.files || []);
+      if (dropped.length) {
+        onFiles([...files, ...dropped.filter(f => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf"))]);
+      }
     },
-    [onFile],
+    [files, onFiles],
   );
 
   const openPicker = () => inputRef.current?.click();
@@ -30,9 +32,13 @@ export function Uploader({ file, onFile, onGenerate, busy }: Props) {
         ref={inputRef}
         type="file"
         accept="application/pdf,.pdf"
+        multiple
         className="sr-only"
         onChange={(e) => {
-          onFile(e.target.files?.[0] ?? null);
+          const selected = Array.from(e.target.files || []);
+          if (selected.length) {
+            onFiles([...files, ...selected]);
+          }
           e.target.value = "";
         }}
       />
@@ -78,37 +84,55 @@ export function Uploader({ file, onFile, onGenerate, busy }: Props) {
       </div>
 
 
-      {file && (
-        <div className="mt-5 flex items-center justify-between gap-4 rounded-xl border border-border bg-surface px-4 py-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <FileText className="size-5 shrink-0 text-accent" />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{file.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {(file.size / 1024 / 1024).toFixed(2)} MB
-              </p>
+      {files.length > 0 && (
+        <div className="mt-5 flex flex-col gap-3">
+          {files.map((f, idx) => (
+            <div key={idx} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-surface px-4 py-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <FileText className="size-5 shrink-0 text-accent" />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{f.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(f.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                aria-label="Remove file"
+                onClick={() => onFiles(files.filter((_, i) => i !== idx))}
+                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-red-500"
+              >
+                <X className="size-4" />
+              </button>
             </div>
-          </div>
-          <button
-            type="button"
-            aria-label="Remove file"
-            onClick={() => onFile(null)}
-            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <X className="size-4" />
-          </button>
+          ))}
         </div>
       )}
 
-      <button
-        type="button"
-        disabled={!file || busy}
-        onClick={onGenerate}
-        className="bg-gradient-brand mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-display text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        <Sparkles className="size-5" />
-        {busy ? "Generating…" : "Generate Explanation"}
-      </button>
+      <div className="mt-6 flex flex-col sm:flex-row gap-3">
+        <button
+          type="button"
+          disabled={files.length === 0 || busy}
+          onClick={() => onGenerate("single")}
+          className="bg-gradient-brand flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-display text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 shadow-md"
+        >
+          <Sparkles className="size-5" />
+          {busy ? "Generating…" : "Generate Explanation"}
+        </button>
+
+        {files.length > 1 && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => onGenerate("merge")}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-accent bg-accent/10 px-6 py-3.5 font-display text-base font-semibold text-accent transition-all hover:bg-accent hover:text-white disabled:cursor-not-allowed disabled:opacity-40 shadow-md"
+          >
+            <UploadCloud className="size-5" />
+            Merge Papers
+          </button>
+        )}
+      </div>
     </div>
   );
 }
