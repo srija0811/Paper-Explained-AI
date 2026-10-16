@@ -42,68 +42,68 @@
 :root {
   --radius: 0.875rem;
 
-  --background:        #ffffff;
-  --foreground:        #000000;
-  --card:              #ffffff;
-  --card-foreground:   #000000;
-  --popover:           #ffffff;
-  --popover-foreground:#000000;
-  --primary:           #c084fc;
-  --primary-foreground:#000000;
-  --secondary:         #f3e8ff;
-  --secondary-foreground:#000000;
-  --muted:             #f8fafc;
-  --muted-foreground:  #333333;
-  --accent:            #c084fc;
-  --accent-foreground: #000000;
-  --destructive:       #ef4444;
+  --background:        #0a0a0a;
+  --foreground:        #f5f5f5;
+  --card:              #111111;
+  --card-foreground:   #f5f5f5;
+  --popover:           #111111;
+  --popover-foreground:#f5f5f5;
+  --primary:           #BC0202;
+  --primary-foreground:#ffffff;
+  --secondary:         #1a0000;
+  --secondary-foreground:#f5f5f5;
+  --muted:             #1c1c1c;
+  --muted-foreground:  #a0a0a0;
+  --accent:            #e00303;
+  --accent-foreground: #ffffff;
+  --destructive:       #ff4444;
   --destructive-foreground:#fff;
-  --border:            #e2e8f0;
-  --input:             #e2e8f0;
-  --ring:              #c084fc;
-  --surface:           #ffffff;
-  --surface-foreground:#000000;
-  --glow:              #e9d5ff;
+  --border:            #2a2a2a;
+  --input:             #1c1c1c;
+  --ring:              #BC0202;
+  --surface:           #141414;
+  --surface-foreground:#f5f5f5;
+  --glow:              #BC0202;
 
-  --gradient-brand: linear-gradient(135deg, #d8b4fe 0%, #c084fc 50%, #a855f7 100%);
-  --gradient-surface: linear-gradient(160deg, rgba(255,255,255,1), rgba(248,250,252,0.88));
-  --shadow-glow: 0 20px 50px -15px rgba(192, 132, 252, 0.4);
-  --shadow-card: 0 4px 24px -8px rgba(192, 132, 252, 0.15);
-  --body-bg-blob1: rgba(192, 132, 252, 0.2);
-  --body-bg-blob2: rgba(216, 180, 254, 0.2);
+  --gradient-brand: linear-gradient(135deg, #BC0202 0%, #e00303 60%, #ff2020 100%);
+  --gradient-surface: linear-gradient(160deg, rgba(20,20,20,0.97), rgba(10,10,10,0.95));
+  --shadow-glow: 0 20px 50px -15px rgba(188, 2, 2, 0.5);
+  --shadow-card: 0 4px 24px -8px rgba(188, 2, 2, 0.2);
+  --body-bg-blob1: rgba(188, 2, 2, 0.12);
+  --body-bg-blob2: rgba(188, 2, 2, 0.06);
 }
 
 /* ─── DARK THEME ────────────────────────────────────────────── */
 [data-theme="dark"] {
-  --background:        #020617;
-  --foreground:        #f8fafc;
-  --card:              #0f172a;
-  --card-foreground:   #f8fafc;
-  --popover:           #0f172a;
-  --popover-foreground:#f8fafc;
-  --primary:           #a78bfa;
-  --primary-foreground:#020617;
-  --secondary:         #1e293b;
-  --secondary-foreground:#f8fafc;
-  --muted:             #1e293b;
-  --muted-foreground:  #94a3b8;
-  --accent:            #c4b5fd;
-  --accent-foreground: #020617;
-  --destructive:       #f87171;
+  --background:        #050505;
+  --foreground:        #f5f5f5;
+  --card:              #0f0f0f;
+  --card-foreground:   #f5f5f5;
+  --popover:           #0f0f0f;
+  --popover-foreground:#f5f5f5;
+  --primary:           #BC0202;
+  --primary-foreground:#ffffff;
+  --secondary:         #1a0000;
+  --secondary-foreground:#f5f5f5;
+  --muted:             #1a1a1a;
+  --muted-foreground:  #888888;
+  --accent:            #e00303;
+  --accent-foreground: #ffffff;
+  --destructive:       #ff4444;
   --destructive-foreground:#fff;
-  --border:            #334155;
-  --input:             #334155;
-  --ring:              #c4b5fd;
-  --surface:           #0f172a;
-  --surface-foreground:#f8fafc;
-  --glow:              #8b5cf6;
+  --border:            #252525;
+  --input:             #1a1a1a;
+  --ring:              #BC0202;
+  --surface:           #0d0d0d;
+  --surface-foreground:#f5f5f5;
+  --glow:              #BC0202;
 
-  --gradient-brand: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
-  --gradient-surface: linear-gradient(160deg, rgba(15,23,42,0.97), rgba(2,6,23,0.92));
-  --shadow-glow: 0 20px 50px -15px rgba(167, 139, 250, 0.3);
-  --shadow-card: 0 4px 32px -8px rgba(139, 92, 246, 0.15);
-  --body-bg-blob1: rgba(139, 92, 246, 0.1);
-  --body-bg-blob2: rgba(167, 139, 250, 0.1);
+  --gradient-brand: linear-gradient(135deg, #BC0202 0%, #e00303 60%, #ff2020 100%);
+  --gradient-surface: linear-gradient(160deg, rgba(15,15,15,0.98), rgba(5,5,5,0.95));
+  --shadow-glow: 0 20px 50px -15px rgba(188, 2, 2, 0.5);
+  --shadow-card: 0 4px 32px -8px rgba(188, 2, 2, 0.2);
+  --body-bg-blob1: rgba(188, 2, 2, 0.1);
+  --body-bg-blob2: rgba(188, 2, 2, 0.05);
 }
 
 /* ─── BASE ──────────────────────────────────────────────────── */

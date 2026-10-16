@@ -8,15 +8,24 @@ import {
   Download,
   FileText,
   Headphones,
+  Home,
+  Layers,
   LogOut,
+  Map,
   Plus,
   Search,
+  Settings,
+  Smartphone,
+  TrendingUp,
   UserCheck,
+  Users,
   Video,
   Zap,
+  Bell,
+  ChevronDown,
 } from "lucide-react";
 import logoImg from "@/assets/logo.jpg";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import avatarImg from "@/assets/avatar.jpg";
 import { Results } from "@/components/paper/Results";
 import { Uploader } from "@/components/paper/Uploader";
 import { PIPELINE_STEPS, ProgressPanel } from "@/components/paper/ProgressPanel";
@@ -73,22 +82,151 @@ const SAMPLE_PAPERS: PaperRecord[] = [
     category: "Computer Vision",
     status: "ready",
   },
+  {
+    id: "p4",
+    title: "RLHF: Training Language Models from Human Feedback",
+    filename: "rlhf_instruct_gpt.pdf",
+    date: "2 weeks ago",
+    figuresCount: 5,
+    duration: "00:58",
+    category: "Alignment",
+    status: "ready",
+  },
 ];
+
+const STATS = [
+  { label: "Papers Analyzed", value: "12", icon: BookOpen, sub: "+3 this week", color: "#BC0202" },
+  { label: "Figures Extracted", value: "48", icon: BarChart3, sub: "Diagrams & tables", color: "#e00303" },
+  { label: "Video Explainers", value: "15", icon: Video, sub: "WebM & Voice", color: "#BC0202" },
+  { label: "Hours Saved", value: "38.5", icon: Zap, sub: "Fast 90s summaries", color: "#e00303" },
+];
+
+const MONTHLY_DATA = [
+  { month: "May", papers: 2, videos: 1 },
+  { month: "Jun", papers: 4, videos: 3 },
+  { month: "Jul", papers: 3, videos: 3 },
+  { month: "Aug", papers: 6, videos: 5 },
+  { month: "Sep", papers: 5, videos: 4 },
+  { month: "Oct", papers: 8, videos: 7 },
+];
+
+const CATEGORIES = [
+  { name: "Deep Learning", count: 247, color: "#BC0202" },
+  { name: "NLP", count: 164, color: "#e00303" },
+  { name: "Computer Vision", count: 98, color: "#ff2020" },
+];
+
+const NAV_ITEMS = [
+  { icon: Home, label: "Overview", view: "library" },
+  { icon: FileText, label: "My Papers", view: "library" },
+  { icon: Layers, label: "Merge Papers", view: "upload" },
+  { icon: Users, label: "Collaborators", view: null },
+  { icon: BarChart3, label: "Analytics", view: null },
+  { icon: Clock, label: "History", view: null },
+];
+
+function MiniBarChart() {
+  const max = Math.max(...MONTHLY_DATA.map((d) => Math.max(d.papers, d.videos)));
+  return (
+    <div className="flex items-end gap-1.5 h-28">
+      {MONTHLY_DATA.map((d) => (
+        <div key={d.month} className="flex flex-col items-center gap-1 flex-1">
+          <div className="flex items-end gap-0.5 w-full justify-center" style={{ height: "88px" }}>
+            <div
+              className="w-3 rounded-t-sm transition-all"
+              style={{
+                height: `${(d.papers / max) * 88}px`,
+                background: "linear-gradient(to top, #BC0202, #ff2020)",
+              }}
+            />
+            <div
+              className="w-3 rounded-t-sm transition-all"
+              style={{
+                height: `${(d.videos / max) * 88}px`,
+                background: "rgba(255,255,255,0.15)",
+              }}
+            />
+          </div>
+          <span className="text-[10px] text-muted-foreground">{d.month}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DonutChart() {
+  const total = CATEGORIES.reduce((s, c) => s + c.count, 0);
+  let angle = -90;
+  const segments = CATEGORIES.map((c) => {
+    const pct = c.count / total;
+    const start = angle;
+    angle += pct * 360;
+    return { ...c, pct, start, end: angle };
+  });
+
+  const toPath = (cx: number, cy: number, r: number, startDeg: number, endDeg: number) => {
+    const toRad = (d: number) => (d * Math.PI) / 180;
+    const x1 = cx + r * Math.cos(toRad(startDeg));
+    const y1 = cy + r * Math.sin(toRad(startDeg));
+    const x2 = cx + r * Math.cos(toRad(endDeg));
+    const y2 = cy + r * Math.sin(toRad(endDeg));
+    const large = endDeg - startDeg > 180 ? 1 : 0;
+    return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`;
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <svg width="110" height="110" viewBox="0 0 110 110">
+        <circle cx="55" cy="55" r="42" fill="transparent" stroke="#1c1c1c" strokeWidth="16" />
+        {segments.map((s, i) => {
+          const r = 42;
+          const cx = 55, cy = 55;
+          const toRad = (d: number) => (d * Math.PI) / 180;
+          const x1 = cx + r * Math.cos(toRad(s.start));
+          const y1 = cy + r * Math.sin(toRad(s.start));
+          const x2 = cx + r * Math.cos(toRad(s.end - 0.5));
+          const y2 = cy + r * Math.sin(toRad(s.end - 0.5));
+          const large = s.end - s.start > 180 ? 1 : 0;
+          return (
+            <path
+              key={i}
+              d={`M ${cx + r * Math.cos(toRad(s.start))} ${cy + r * Math.sin(toRad(s.start))} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`}
+              fill="none"
+              stroke={s.color}
+              strokeWidth="16"
+              strokeLinecap="round"
+            />
+          );
+        })}
+        <text x="55" y="50" textAnchor="middle" fill="#f5f5f5" fontSize="14" fontWeight="bold">{Math.round((CATEGORIES[0].count / total) * 100)}%</text>
+        <text x="55" y="65" textAnchor="middle" fill="#888" fontSize="8">Deep Learning</text>
+      </svg>
+      <div className="flex flex-col gap-1.5 w-full">
+        {CATEGORIES.map((c) => (
+          <div key={c.name} className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full shrink-0" style={{ background: c.color }} />
+              <span className="text-muted-foreground">{c.name}</span>
+            </div>
+            <span className="font-bold text-foreground">{c.count}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function DashboardPage() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("Researcher");
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-
-  // Active view: "library" | "results" | "upload"
+  const [userEmail, setUserEmail] = useState("researcher@paperpal.ai");
   const [view, setView] = useState<"library" | "results" | "upload">("library");
   const [selectedPaper, setSelectedPaper] = useState<PaperRecord>(SAMPLE_PAPERS[0]);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Upload flow state
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [phase, setPhase] = useState<"idle" | "working" | "done">("idle");
   const [progress, setProgress] = useState(0);
+  const [activeNav, setActiveNav] = useState("Overview");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -98,6 +236,7 @@ function DashboardPage() {
         navigate({ to: "/auth" });
       } else if (name) {
         setUserName(name);
+        setUserEmail(name.toLowerCase().replace(/\s+/g, ".") + "@paperpal.ai");
       }
     }
   }, [navigate]);
@@ -107,21 +246,18 @@ function DashboardPage() {
       localStorage.removeItem("paper_pal_auth");
       localStorage.removeItem("paper_pal_user");
     }
-    setIsLoggedIn(false);
     navigate({ to: "/auth" });
   };
 
-  const handleStartUpload = () => {
-    if (!file) return;
+  const handleStartUpload = (mode: "single" | "merge" = "single") => {
+    if (files.length === 0) return;
     setPhase("working");
     setProgress(0);
     const total = 40;
     for (let i = 1; i <= total; i++) {
       setTimeout(() => {
         setProgress((i / total) * 100);
-        if (i === total) {
-          setPhase("done");
-        }
+        if (i === total) setPhase("done");
       }, i * 80);
     }
   };
@@ -133,236 +269,299 @@ function DashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Dashboard Top Navigation Header */}
-      <header className="border-b border-border bg-surface/80 backdrop-blur sticky top-0 z-50">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <img
-                src={logoImg}
-                alt="Paper Explained AI Logo"
-                className="size-10 rounded-xl shadow-md glow-ring transition-transform group-hover:scale-105 object-cover"
-              />
-              <span className="font-display text-lg font-bold">Paper Explained AI</span>
-            </Link>
+    <div className="h-screen w-screen overflow-hidden flex" style={{ background: "#080808" }}>
 
-            <nav className="hidden md:flex items-center gap-1 border-l border-border pl-6">
+      {/* ── SIDEBAR ──────────────────────────────────────────── */}
+      <aside className="hidden lg:flex flex-col w-64 shrink-0 h-full" style={{ background: "#0d0d0d", borderRight: "1px solid #1e1e1e" }}>
+
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 px-5 py-5 border-b" style={{ borderColor: "#1e1e1e" }}>
+          <img src={logoImg} alt="Logo" className="size-9 rounded-xl object-cover shadow-lg" style={{ boxShadow: "0 0 12px rgba(188,2,2,0.4)" }} />
+          <div>
+            <span className="font-display text-sm font-bold text-white block leading-tight">Paper Explained</span>
+            <span className="text-[10px] font-bold" style={{ color: "#BC0202" }}>AI Research Tool</span>
+          </div>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex flex-col gap-1 px-3 py-4 flex-1 overflow-y-auto">
+          <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: "#444" }}>Main Menu</p>
+
+          {NAV_ITEMS.map(({ icon: Icon, label, view: v }) => {
+            const isActive = activeNav === label;
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => {
+                  setActiveNav(label);
+                  if (v) setView(v as any);
+                }}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all w-full text-left group"
+                style={{
+                  background: isActive ? "linear-gradient(135deg, #BC0202, #e00303)" : "transparent",
+                  color: isActive ? "#fff" : "#888",
+                  boxShadow: isActive ? "0 4px 15px rgba(188,2,2,0.3)" : "none",
+                }}
+              >
+                <Icon className="size-4 shrink-0" style={{ color: isActive ? "#fff" : "#555" }} />
+                {label}
+              </button>
+            );
+          })}
+
+          <div className="mt-2 border-t pt-2" style={{ borderColor: "#1e1e1e" }}>
+            <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: "#444" }}>Settings</p>
+            <button
+              type="button"
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all w-full text-left"
+              style={{ color: "#666" }}
+            >
+              <Settings className="size-4" style={{ color: "#555" }} />
+              Settings
+            </button>
+          </div>
+        </nav>
+
+        {/* Mobile app promo */}
+        <div className="mx-3 mb-4 p-4 rounded-2xl" style={{ background: "linear-gradient(135deg, #1a0000, #2a0000)", border: "1px solid #3a0000" }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Smartphone className="size-5" style={{ color: "#BC0202" }} />
+            <span className="text-xs font-bold text-white">Get mobile app</span>
+          </div>
+          <p className="text-[10px] mb-3" style={{ color: "#888" }}>Explain papers on the go</p>
+          <div className="flex gap-2">
+            <span className="text-[9px] rounded-lg px-2 py-1 font-bold" style={{ background: "#BC0202", color: "#fff" }}>App Store</span>
+            <span className="text-[9px] rounded-lg px-2 py-1 font-bold" style={{ background: "#222", color: "#888", border: "1px solid #333" }}>Google Play</span>
+          </div>
+        </div>
+
+        {/* Sign out */}
+        <div className="px-3 pb-4 border-t pt-3" style={{ borderColor: "#1e1e1e" }}>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold w-full text-left transition-all hover:bg-red-950/30"
+            style={{ color: "#ff4444" }}
+          >
+            <LogOut className="size-4" />
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      {/* ── MAIN AREA ─────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+
+        {/* Top bar */}
+        <header className="flex items-center justify-between px-6 py-4 shrink-0" style={{ background: "#0d0d0d", borderBottom: "1px solid #1e1e1e" }}>
+          {/* Search */}
+          <div className="relative w-72">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4" style={{ color: "#555" }} />
+            <input
+              type="text"
+              placeholder="Search papers, topics..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none transition-all"
+              style={{ background: "#141414", border: "1px solid #222", color: "#f5f5f5" }}
+            />
+          </div>
+
+          {/* Right: Upload btn + bell + avatar */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => { setView("upload"); setPhase("idle"); setFiles([]); setActiveNav("Merge Papers"); }}
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition-all hover:opacity-90"
+              style={{ background: "linear-gradient(135deg, #BC0202, #e00303)", boxShadow: "0 4px 15px rgba(188,2,2,0.3)" }}
+            >
+              <Plus className="size-3.5" />
+              Explain Paper
+            </button>
+
+            <button type="button" className="relative p-2.5 rounded-xl transition-all hover:bg-white/5" style={{ border: "1px solid #222" }}>
+              <Bell className="size-4" style={{ color: "#666" }} />
+              <span className="absolute top-1.5 right-1.5 size-2 rounded-full" style={{ background: "#BC0202" }} />
+            </button>
+
+            <div className="flex items-center gap-2 cursor-pointer rounded-xl px-3 py-2 transition-all hover:bg-white/5" style={{ border: "1px solid #222" }}>
+              <img src={avatarImg} alt="Avatar" className="size-7 rounded-full object-cover" style={{ border: "2px solid #BC0202" }} />
+              <div className="hidden sm:block">
+                <p className="text-xs font-bold text-white leading-tight">{userName}</p>
+                <p className="text-[10px]" style={{ color: "#555" }}>Researcher</p>
+              </div>
+              <ChevronDown className="size-3.5 ml-1" style={{ color: "#555" }} />
+            </div>
+          </div>
+        </header>
+
+        {/* Scrollable content */}
+        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+
+          {/* ── OVERVIEW / LIBRARY ── */}
+          {view === "library" && (
+            <>
+              {/* Stat Cards */}
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+                {STATS.map((s) => {
+                  const Icon = s.icon;
+                  return (
+                    <div key={s.label} className="rounded-2xl p-5 transition-all hover:scale-[1.02]" style={{ background: "#111", border: "1px solid #1e1e1e", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="size-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(188,2,2,0.15)" }}>
+                          <Icon className="size-5" style={{ color: "#BC0202" }} />
+                        </div>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "#1a0000", color: "#BC0202" }}>
+                          ▲ +12%
+                        </span>
+                      </div>
+                      <p className="text-2xl font-bold font-display text-white">{s.value}</p>
+                      <p className="text-xs font-semibold mt-0.5" style={{ color: "#888" }}>{s.label}</p>
+                      <p className="text-[10px] mt-0.5" style={{ color: "#555" }}>{s.sub}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Charts Row */}
+              <div className="grid lg:grid-cols-3 gap-4">
+                {/* Bar Chart */}
+                <div className="lg:col-span-2 rounded-2xl p-5" style={{ background: "#111", border: "1px solid #1e1e1e" }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h2 className="text-sm font-bold text-white">Papers vs Videos Trend</h2>
+                      <p className="text-[11px] mt-0.5" style={{ color: "#555" }}>Monthly activity overview</p>
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px]">
+                      <span className="flex items-center gap-1.5"><span className="size-2 rounded-full inline-block" style={{ background: "#BC0202" }} />Papers</span>
+                      <span className="flex items-center gap-1.5" style={{ color: "#666" }}><span className="size-2 rounded-full inline-block" style={{ background: "#333" }} />Videos</span>
+                    </div>
+                  </div>
+                  <MiniBarChart />
+                </div>
+
+                {/* Donut Chart */}
+                <div className="rounded-2xl p-5" style={{ background: "#111", border: "1px solid #1e1e1e" }}>
+                  <h2 className="text-sm font-bold text-white mb-1">Papers by Category</h2>
+                  <p className="text-[11px] mb-4" style={{ color: "#555" }}>Distribution by research area</p>
+                  <DonutChart />
+                </div>
+              </div>
+
+              {/* Papers Table */}
+              <div className="rounded-2xl" style={{ background: "#111", border: "1px solid #1e1e1e" }}>
+                <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid #1e1e1e" }}>
+                  <h2 className="text-sm font-bold text-white">Your Research Library</h2>
+                  <button
+                    type="button"
+                    onClick={() => { setView("upload"); setPhase("idle"); setFiles([]); }}
+                    className="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold text-white hover:opacity-90 transition-all"
+                    style={{ background: "linear-gradient(135deg, #BC0202, #e00303)" }}
+                  >
+                    <Plus className="size-3.5" /> Add Paper
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
+                        {["Paper Title", "Category", "Figures", "Duration", "Date", "Action"].map((h) => (
+                          <th key={h} className="text-left px-5 py-3 text-[10px] font-bold uppercase tracking-wider" style={{ color: "#444" }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPapers.map((p, i) => (
+                        <tr
+                          key={p.id}
+                          className="transition-all hover:bg-white/[0.02] group"
+                          style={{ borderBottom: i < filteredPapers.length - 1 ? "1px solid #161616" : "none" }}
+                        >
+                          <td className="px-5 py-3.5 max-w-[200px]">
+                            <p className="font-semibold text-white text-xs leading-tight line-clamp-2 group-hover:text-red-400 transition-colors">{p.title}</p>
+                            <p className="text-[10px] mt-0.5 truncate" style={{ color: "#444" }}>{p.filename}</p>
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <span className="text-[10px] font-bold rounded-full px-2.5 py-1" style={{ background: "#1a0000", color: "#e00303" }}>{p.category}</span>
+                          </td>
+                          <td className="px-5 py-3.5 text-xs font-semibold" style={{ color: "#888" }}>{p.figuresCount}</td>
+                          <td className="px-5 py-3.5 text-xs font-semibold" style={{ color: "#888" }}>{p.duration}</td>
+                          <td className="px-5 py-3.5 text-xs" style={{ color: "#666" }}>{p.date}</td>
+                          <td className="px-5 py-3.5">
+                            <button
+                              type="button"
+                              onClick={() => { setSelectedPaper(p); setView("results"); }}
+                              className="text-[10px] font-bold rounded-lg px-3 py-1.5 transition-all hover:opacity-80"
+                              style={{ background: "linear-gradient(135deg, #BC0202, #e00303)", color: "#fff" }}
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Bottom: Stats summary card */}
+              <div className="rounded-2xl p-5 flex items-center justify-between" style={{ background: "linear-gradient(135deg, #BC0202 0%, #7a0101 100%)", boxShadow: "0 8px 30px rgba(188,2,2,0.4)" }}>
+                <div>
+                  <p className="text-white/60 text-xs font-semibold">This Month's Impact</p>
+                  <p className="text-white text-3xl font-bold font-display mt-1">12 <span className="text-lg font-semibold text-white/70">Papers</span></p>
+                </div>
+                <div className="text-right">
+                  <p className="text-white/60 text-xs">Total research time saved</p>
+                  <p className="text-white text-2xl font-bold mt-1">38.5 hrs</p>
+                </div>
+                <TrendingUp className="size-16 text-white/20" />
+              </div>
+            </>
+          )}
+
+          {/* ── RESULTS VIEW ── */}
+          {view === "results" && (
+            <div className="space-y-4">
               <button
                 type="button"
                 onClick={() => setView("library")}
-                className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all ${
-                  view === "library"
-                    ? "bg-gradient-brand text-primary-foreground shadow"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className="inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+                style={{ color: "#BC0202" }}
               >
-                Dashboard Library
+                ← Back to Library
               </button>
+              <Results fileName={selectedPaper.filename} onReset={() => setView("library")} />
+            </div>
+          )}
+
+          {/* ── UPLOAD VIEW ── */}
+          {view === "upload" && (
+            <section className="max-w-4xl mx-auto space-y-4">
               <button
                 type="button"
-                onClick={() => {
-                  setView("upload");
-                  setPhase("idle");
-                  setFile(null);
-                }}
-                className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all ${
-                  view === "upload"
-                    ? "bg-gradient-brand text-primary-foreground shadow"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                onClick={() => setView("library")}
+                className="inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+                style={{ color: "#BC0202" }}
               >
-                + New Upload
+                ← Back to Library
               </button>
-            </nav>
-          </div>
 
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <span className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm">
-              <UserCheck className="size-3.5 text-accent" /> {userName}
-            </span>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-secondary px-3.5 py-1.5 text-xs font-semibold text-secondary-foreground transition-all hover:bg-muted"
-            >
-              <LogOut className="size-3.5" /> Sign Out
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl w-full px-6 py-8 flex-1 space-y-8">
-        {/* Welcome Banner & Metrics */}
-        <section className="glass-card p-6 sm:p-8 border-accent/30">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-0.5 text-xs font-semibold text-accent border border-accent/30">
-                  <Bot className="size-3.5" /> Research Dashboard
-                </span>
-              </div>
-              <h1 className="mt-2 font-display text-2xl sm:text-3xl font-bold">
-                Welcome back, <span className="text-gradient">{userName}</span>
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Manage your paper summaries, extracted figures, and AI narrated video explainers.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setView("upload");
-                setPhase("idle");
-                setFile(null);
-              }}
-              className="bg-gradient-brand inline-flex items-center gap-2 rounded-xl px-5 py-3 font-display font-bold text-primary-foreground shadow-md glow-ring transition-opacity hover:opacity-90 shrink-0"
-            >
-              <Plus className="size-4" /> Explain New Paper
-            </button>
-          </div>
-
-          {/* Metric Callouts */}
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { label: "Papers Analyzed", value: "12", icon: BookOpen, sub: "+3 this week" },
-              { label: "Figures Extracted", value: "48", icon: BarChart3, sub: "Diagrams & tables" },
-              { label: "Video Explainers", value: "15", icon: Video, sub: "WebM & Voice" },
-              { label: "Research Time Saved", value: "38.5 hrs", icon: Zap, sub: "Fast 90s summaries" },
-            ].map((m) => {
-              const Icon = m.icon;
-              return (
-                <div key={m.label} className="rounded-xl border border-border bg-surface p-4 transition-all hover:border-accent/40">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase">{m.label}</span>
-                    <div className="size-8 rounded-lg bg-accent/15 flex items-center justify-center text-accent">
-                      <Icon className="size-4" />
-                    </div>
-                  </div>
-                  <p className="mt-2 text-2xl font-bold font-display">{m.value}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{m.sub}</p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Dashboard Content Switcher */}
-        {view === "library" && (
-          <section className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="font-display text-xl font-bold">Your Research Library</h2>
-                <p className="text-xs text-muted-foreground">Select a paper to review its summary and video explainer.</p>
-              </div>
-
-              <div className="relative w-full sm:w-72">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search papers or topics..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface pl-10 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all"
+              {phase === "idle" && (
+                <Uploader files={files} onFiles={setFiles} onGenerate={handleStartUpload} busy={false} />
+              )}
+              {phase === "working" && <ProgressPanel progress={progress} step={0} />}
+              {phase === "done" && files.length > 0 && (
+                <Results
+                  fileName={files[0].name}
+                  onReset={() => { setPhase("idle"); setFiles([]); }}
                 />
-              </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredPapers.map((paper) => (
-                <div
-                  key={paper.id}
-                  className="glass-card p-6 border-border flex flex-col justify-between transition-all hover:border-accent/50 hover:shadow-lg group"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="inline-flex items-center rounded-full bg-accent/15 px-2.5 py-0.5 text-xs font-semibold text-accent border border-accent/20">
-                        {paper.category}
-                      </span>
-                      <span className="text-xs text-muted-foreground">{paper.date}</span>
-                    </div>
-                    <h3 className="font-display text-base font-bold group-hover:text-accent transition-colors line-clamp-2">
-                      {paper.title}
-                    </h3>
-                    <p className="text-xs font-mono text-muted-foreground truncate">{paper.filename}</p>
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-border flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <BarChart3 className="size-3.5 text-accent" /> {paper.figuresCount} figs
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="size-3.5 text-accent" /> {paper.duration}
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedPaper(paper);
-                        setView("results");
-                      }}
-                      className="bg-gradient-brand inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
-                    >
-                      <Video className="size-3.5" /> View
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* View Results Mode */}
-        {view === "results" && (
-          <div className="space-y-4">
-            <button
-              type="button"
-              onClick={() => setView("library")}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-accent hover:underline mb-2"
-            >
-              ← Back to Library
-            </button>
-            <Results fileName={selectedPaper.filename} onReset={() => setView("library")} />
-          </div>
-        )}
-
-        {/* View Upload Mode */}
-        {view === "upload" && (
-          <section className="mx-auto max-w-4xl space-y-4">
-            <button
-              type="button"
-              onClick={() => setView("library")}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-accent hover:underline mb-2"
-            >
-              ← Back to Library
-            </button>
-
-            {phase === "idle" && (
-              <Uploader file={file} onFile={setFile} onGenerate={handleStartUpload} busy={false} />
-            )}
-
-            {phase === "working" && <ProgressPanel progress={progress} step={0} />}
-
-            {phase === "done" && file && (
-              <Results
-                fileName={file.name}
-                onReset={() => {
-                  setPhase("idle");
-                  setFile(null);
-                }}
-              />
-            )}
-          </section>
-        )}
-      </main>
-
-      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Paper Explained AI — Research Dashboard.
-      </footer>
+              )}
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
